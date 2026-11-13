@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>MYTRONOME Privacy Policy</title>
+  <style>
+    :root { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: #111; background: #d8d8d8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background-image: linear-gradient(#0000000a 1px, transparent 1px), linear-gradient(90deg, #0000000a 1px, transparent 1px); background-size: 20px 20px; }
+    main { max-width: 760px; margin: 0 auto; padding: 40px 18px 72px; }
+    header { display: flex; align-items: start; justify-content: space-between; gap: 20px; padding: 20px 18px; border: 1px solid #111; background: #dedede; }
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; }
+    h1 { margin: 8px 0 4px; font: 900 clamp(30px, 7vw, 52px)/.98 system-ui, sans-serif; letter-spacing: -.04em; }
+    .subtitle { color: #666; font-size: 11px; }
+    nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0; }
+    nav button { appearance: none; border: 1px solid #111; background: #111; color: #eee; padding: 11px 14px; font: 700 12px ui-monospace, monospace; cursor: pointer; }
+    nav button[aria-pressed="true"] { background: #94ff23; color: #111; }
+    nav button:focus-visible { outline: 3px solid #377be8; outline-offset: 2px; }
+    article { border: 1px solid #111; background: #e5e5e5; padding: clamp(18px, 4vw, 32px); overflow-wrap: anywhere; }
+    article h2 { margin: 28px 0 8px; font: 800 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    article h2:first-child { margin-top: 0; }
+    article p { margin: 0 0 18px; font-size: 13px; line-height: 1.75; white-space: pre-line; }
+    article p:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <div class="eyebrow">MYTRONOME</div>
+        <h1 id="page-title">PRIVACY POLICY</h1>
+        <div class="subtitle">WHOAHA STUDIO</div>
+      </div>
+    </header>
+    <nav aria-label="Policy language">
+      <button type="button" data-lang="en">English</button>
+      <button type="button" data-lang="zh-Hans">简体中文</button>
+      <button type="button" data-lang="zh-Hant">繁體中文</button>
+    </nav>
+    <article id="policy" aria-live="polite">
+      <iframe title="MYTRONOME Privacy Policy" src="../../Metronome/Resources/Privacy-Policy-en.txt" style="width:100%;min-height:75vh;border:0"></iframe>
+    </article>
+  </main>
+  <script>
+    const policies = {
+      en: '../../Metronome/Resources/Privacy-Policy-en.txt',
+      'zh-Hans': '../../Metronome/Resources/Privacy-Policy-zh.txt',
+      'zh-Hant': '../../Metronome/Resources/Privacy-Policy-zh-Hant.txt'
+    };
+    const titles = { en: 'PRIVACY POLICY', 'zh-Hans': '隐私政策', 'zh-Hant': '隱私權政策' };
+    const policy = document.getElementById('policy');
+    const buttons = [...document.querySelectorAll('nav button')];
+    const browserLanguage = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+    function normalizedLanguage(value) {
+      const language = value.toLowerCase().replaceAll('_', '-');
+      if (!language.startsWith('zh')) return 'en';
+      return /hant|-(tw|hk|mo)(-|$)/.test(language) ? 'zh-Hant' : 'zh-Hans';
+    }
+    async function showPolicy(language) {
+      const selected = policies[language] ? language : 'en';
+      buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.lang === selected)));
+      document.documentElement.lang = selected;
+      document.getElementById('page-title').textContent = titles[selected];
+      document.title = `MYTRONOME — ${titles[selected]}`;
+      try {
+        const response = await fetch(policies[selected]);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const text = (await response.text()).replaceAll('\r\n', '\n');
+        policy.replaceChildren();
+        for (const block of text.split(/\n\s*\n/).map(item => item.trim()).filter(Boolean)) {
+          const [firstLine, ...remainingLines] = block.split('\n');
+          if (/^#{1,2} /.test(firstLine)) {
+            const heading = document.createElement('h2');
+            heading.textContent = firstLine.replace(/^#{1,2} /, '');
+            policy.append(heading);
+            if (remainingLines.length) {
+              const body = document.createElement('p');
+              body.textContent = remainingLines.join('\n');
+              policy.append(body);
+            }
+          } else {
+            const body = document.createElement('p');
+            body.textContent = block;
+            policy.append(body);
+          }
+        }
+      } catch (_) {
+        // Browsers block fetch() from file:// pages. The iframe can still display
+        // the neighboring text file when this page is opened locally.
+        const preview = document.createElement('iframe');
+        preview.title = document.title;
+        preview.src = policies[selected];
+        preview.style.cssText = 'width:100%;min-height:75vh;border:0';
+        policy.replaceChildren(preview);
+      }
+    }
+    buttons.forEach(button => button.addEventListener('click', () => {
+      localStorage.setItem('mytronome-policy-language', button.dataset.lang);
+      showPolicy(button.dataset.lang);
+    }));
+    showPolicy(localStorage.getItem('mytronome-policy-language') || normalizedLanguage(browserLanguage));
+  </script>
+</body>
+</html>
