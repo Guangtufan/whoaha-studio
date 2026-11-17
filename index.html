@@ -131,7 +131,7 @@
     <div class="hero">
       <div class="eyebrow"><span class="prompt">~/</span> <span data-en="independent development studio" data-zh="独立开发工作室">independent development studio</span></div>
       <h1>Whoaha-Studio<span class="cursor" aria-hidden="true"></span></h1>
-      <p class="hero-slogan" data-en="Make everyday life more interesting" data-zh="让日常生活更有趣">Make everyday life more interesting</p>
+      <p class="hero-slogan"><span data-en="Make everyday life more " data-zh="让日常生活更">Make everyday life more </span><span id="slogan-word">interesting</span></p>
       <p class="hero-copy" data-en="We take small ideas and make them better, bringing a little more joy to every day." data-zh="把一个个小想法做得更好，让每一天多一点小乐趣。">We take small ideas and make them better, bringing a little more joy to every day.</p>
     </div>
 
@@ -181,10 +181,42 @@
 <script>
   const languageButton = document.querySelector('.lang-toggle');
   const translatable = document.querySelectorAll('[data-en][data-zh]');
+  const sloganWord = document.querySelector('#slogan-word');
+  const sloganWords = {
+    en: [
+      'interesting', 'fun', 'playful', 'joyful', 'colorful',
+      'vibrant', 'delightful', 'enjoyable', 'exciting', 'lively',
+      'meaningful', 'rewarding', 'inspiring', 'surprising', 'magical',
+      'creative', 'comfortable', 'uplifting', 'engaging', 'memorable',
+      'imaginative', 'dynamic', 'expressive', 'refreshing', 'adventurous',
+      'whimsical', 'wonder-filled', 'light-hearted', 'fulfilling', 'carefree',
+      'Whoaha'
+    ],
+    zh: [
+      '有趣', '好玩', '轻松', '快乐', '美好',
+      '多彩', '鲜活', '生动', '自在', '温暖',
+      '愉快', '丰富', '惬意', '充实', '明亮',
+      '新鲜', '灵动', '丰盈', '舒心', '有意思',
+      '有活力', '有温度', '有滋味', '有趣味', '有盼头',
+      '有灵感', '有色彩', '有惊喜', '有乐趣', '有诗意',
+      '嚯然开朗'
+    ]
+  };
   let language = 'en';
+  let wordIndex = 0;
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.setInterval(() => {
+      const words = sloganWords[language];
+      const next = Math.floor(Math.random() * (words.length - 1));
+      wordIndex = next >= wordIndex ? next + 1 : next;
+      sloganWord.textContent = words[wordIndex];
+    }, 250);
+  }
   languageButton.addEventListener('click', () => {
     language = language === 'en' ? 'zh' : 'en';
     document.documentElement.lang = language;
+    wordIndex = 0;
+    sloganWord.textContent = sloganWords[language][wordIndex];
     translatable.forEach((element) => {
       if (element.tagName === 'H1') {
         const cursor = element.querySelector('.cursor');
